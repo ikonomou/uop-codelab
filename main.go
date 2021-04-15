@@ -7,6 +7,8 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
+var countVotes = 0
+
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Info("Started web service...")
@@ -18,6 +20,7 @@ func main() {
 
 func Vote(w http.ResponseWriter, req *http.Request) {
 	log.Infof("Received POST for Vote")
+	countVotes++
 
 	err := req.ParseForm()
 	if err != nil {
@@ -26,11 +29,11 @@ func Vote(w http.ResponseWriter, req *http.Request) {
 
 	vote := req.PostFormValue("contact")
 
-	log.Infof("Vote is %v", vote)
+	log.Infof("Vote is %v - vote count = %d", vote, countVotes)
 
 	ProcessVote(vote)
 
-	fmt.Fprintf(w, "Thank you for voting!")
+	fmt.Fprintf(w, "Thank you for voting - You are vote %d!", countVotes)
 }
 
 func ProcessVote(vote string) int {
