@@ -8,6 +8,7 @@ import (
 )
 
 func main() {
+	log.SetLevel(log.DebugLevel)
 	log.Info("Started web service...")
 
 	http.HandleFunc("/", Homepage)
@@ -16,7 +17,43 @@ func main() {
 }
 
 func Vote(w http.ResponseWriter, req *http.Request) {
+	log.Infof("Received POST for Vote")
 
+	err := req.ParseForm()
+	if err != nil {
+		log.Error("Cannot parse form!")
+	}
+
+	vote := req.PostFormValue("contact")
+
+	log.Infof("Vote is %v", vote)
+
+	ProcessVote(vote)
+
+	fmt.Fprintf(w, "Thank you for voting!")
+}
+
+func ProcessVote(vote string) int {
+	log.Warnf("Into ProcessVote with param = %v", vote)
+
+	var voteInt int
+	switch vote {
+	case "1":
+		log.Debug("User didn't like it")
+		voteInt = 100
+	case "2":
+		voteInt = 200
+	case "3":
+		voteInt = 300
+	case "4":
+		voteInt = 400
+	case "5":
+		voteInt = 500
+	default:
+		log.Errorf("I don't know what vote %s is!!!", vote)
+		voteInt = 0
+	}
+	return voteInt
 }
 
 func Homepage(w http.ResponseWriter, req *http.Request) {
