@@ -5,13 +5,24 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var countVotes = 0
 
+var votesMetrics = promauto.NewGauge(prometheus.GaugeOpts{
+	Name: "uop_vote_metrics",
+	Help: "The vote sent by UOP seminar attendants.",
+})
+
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Info("Started web service...")
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	http.HandleFunc("/", Homepage)
 	http.HandleFunc("/vote", Vote)
@@ -56,6 +67,8 @@ func ProcessVote(vote string) int {
 		log.Errorf("I don't know what vote %s is!!!", vote)
 		voteInt = 0
 	}
+
+	votesMetrics.Set(float64(voteInt))
 	return voteInt
 }
 
