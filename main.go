@@ -5,13 +5,25 @@ import (
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 var countVotes = 0
 
+var votesMetrics = promauto.NewHistogram(prometheus.HistogramOpts{
+	Name:    "uop_vote_histogram",
+	Help:    "The vote sent by UOP seminar attendants.",
+	Buckets: prometheus.LinearBuckets(1, 1, 5),
+})
+
 func main() {
 	log.SetLevel(log.DebugLevel)
 	log.Info("Started web service...")
+
+	http.Handle("/metrics", promhttp.Handler())
 
 	http.HandleFunc("/", Homepage)
 	http.HandleFunc("/vote", Vote)
@@ -43,19 +55,22 @@ func ProcessVote(vote string) int {
 	switch vote {
 	case "1":
 		log.Debug("User didn't like it")
-		voteInt = 100
+		voteInt = 1
 	case "2":
-		voteInt = 200
+		voteInt = 2
 	case "3":
-		voteInt = 300
+		voteInt = 3
 	case "4":
-		voteInt = 400
+		voteInt = 4
 	case "5":
-		voteInt = 500
+		voteInt = 5
 	default:
 		log.Errorf("I don't know what vote %s is!!!", vote)
 		voteInt = 0
 	}
+
+	votesMetrics.Observe(float64(voteInt))
+
 	return voteInt
 }
 

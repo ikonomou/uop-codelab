@@ -15,7 +15,7 @@ spec:
     spec:
       containers:
         - name: voting-machine
-          image: ikonomou/uop-test:v1
+          image: ikonomou/uop-test:v3
           imagePullPolicy: Always
           ports:
             - name: http-voting
