@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uop-voting
+  labels:
+    uop-label: uop-voting
+spec:
+  selector:
+    matchLabels:
+      uop-label: uop-voting
+  template:
+    metadata:
+      labels:
+        uop-label: uop-voting
+    spec:
+      containers:
+        - name: voting-machine
+          image: ikonomou/uop-test:v4
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8090
+              protocol: TCP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: uop-voting-service
+spec:
+  ports:
+    - protocol: TCP
+      name: web
+      port: 80
+      targetPort: 8090
+  selector:
+    uop-label: uop-voting
+  type: LoadBalancer
